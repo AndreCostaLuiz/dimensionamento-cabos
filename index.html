@@ -1,1 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimensionamento de Condutores - NBR 5410</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef2f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 650px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            text-align: center;
+            color: #007BFF;
+            font-size: 22px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+            color: #444;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            background: #e9ecef;
+            padding: 12px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
 
+    <div class="container">
+        <h2>Dimensionamento de Condutores - NBR 5410</h2>
+
+        <label for="tensao">Tensão da Rede (V):</label>
+        <input type="number" id="tensao" value="380">
+
+        <label for="potencia">Potência do Equipamento (W):</label>
+        <input type="number" id="potencia" value="5000">
+
+        <label for="corrente">Corrente do Equipamento (A) (Opcional):</label>
+        <input type="number" id="corrente" placeholder="Deixe em branco para cálculo automático">
+
+        <label for="distancia">Distância do Circuito (m):</label>
+        <input type="number" id="distancia" value="100">
+
+        <label for="sistema">Sistema:</label>
+        <select id="sistema">
+            <option value="Monofásico">Monofásico</option>
+            <option value="Bifásico">Bifásico</option>
+            <option value="Trifásico">Trifásico</option>
+        </select>
+
+        <label for="material">Material do Condutor:</label>
+        <select id="material">
+            <option value="Cobre">Cobre</option>
+            <option value="Alumínio">Alumínio</option>
+        </select>
+
+        <label for="metodo">Método de Instalação:</label>
+        <select id="metodo">
+            <option value="B1">B1 - Eletroduto aparente</option>
+            <option value="C">C - Bandejas não perfuradas</option>
+            <option value="D">D - Eletroduto enterrado</option>
+        </select>
+
+        <label for="quedaTensao">Queda de Tensão Máxima Permitida (%):</label>
+        <input type="number" id="quedaTensao" value="4">
+
+        <button onclick="calcularBitola()">Calcular</button>
+
+        <div class="result" id="resultado">Preencha os dados e clique em calcular.</div>
+    </div>
+
+    <script>
+        function calcularBitola() {
+            let tensao = parseFloat(document.getElementById("tensao").value);
+            let potenciaW = parseFloat(document.getElementById("potencia").value);
+            let correnteInput = document.getElementById("corrente").value;
+            let distancia = parseFloat(document.getElementById("distancia").value);
+            let sistema = document.getElementById("sistema").value;
+            let material = document.getElementById("material").value;
+            let metodo = document.getElementById("metodo").value;
+            let quedaTensao = parseFloat(document.getElementById("quedaTensao").value);
+
+            let corrente;
+            if (correnteInput) {
+                corrente = parseFloat(correnteInput);
+            } else {
+                let potenciaVA = potenciaW / 0.8;
+                let fatorSistema = sistema === "Monofásico" ? 1 : Math.sqrt(3);
+                corrente = potenciaVA / (fatorSistema * tensao);
+            }
+
+            let resistividade = { "Cobre": 135, "Alumínio": 70 }[material];
+
+            let bitolaQueda = (200 * corrente * distancia) / (resistividade * tensao * quedaTensao);
+            let bitolaMinima = 2.5;
+
+            let bitolasComerciais = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240];
+            let bitolaFinal = bitolasComerciais.find(b => b >= Math.max(bitolaQueda, bitolaMinima)) || bitolasComerciais[bitolasComerciais.length - 1];
+
+            let condutorTerra = bitolaFinal <= 16 ? bitolaFinal : (bitolaFinal <= 35 ? 16 : bitolasComerciais.find(b => b >= bitolaFinal / 2));
+            let condutorNeutro = bitolaFinal <= 25 ? bitolaFinal : 25;
+
+            document.getElementById("resultado").innerHTML = `
+                <b>Bitola Recomendada (Fase): ${bitolaFinal} mm²</b><br>
+                <b>Condutor Terra (PE): ${condutorTerra} mm²</b><br>
+                <b>Condutor Neutro (N): ${condutorNeutro} mm²</b><br>
+                <b>Corrente Considerada: ${corrente.toFixed(2)} A</b><br>
+                <b>Critério de Queda de Tensão: ${bitolaQueda.toFixed(2)} mm²</b><br>
+                <b>Cabos Considerados: Afumex Flex 0,6/1kV, HEPR, 90°C</b>
+            `;
+        }
+    </script>
+
+</body>
+</html>
