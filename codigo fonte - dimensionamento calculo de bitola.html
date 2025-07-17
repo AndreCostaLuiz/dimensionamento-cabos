@@ -3,157 +3,678 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dimensionamento de Condutores - NBR 5410</title>
+    <title>Calculadora de Bitola NBR 5410</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #eef2f7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --background: #f8fafc;
+            --foreground: #0f172a;
+            --card: #ffffff;
+            --card-foreground: #0f172a;
+            --border: #e2e8f0;
+            --input: #e2e8f0;
+            --ring: #3b82f6;
+            --radius: 0.5rem;
+        }
+
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
+
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
         .container {
-            width: 90%;
-            max-width: 650px;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 42rem;
+            margin: 0 auto;
         }
-        h2 {
+
+        .card {
+            background-color: var(--card);
+            color: var(--card-foreground);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
             text-align: center;
-            color: #007BFF;
-            font-size: 22px;
         }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 10px;
-            color: #444;
+
+        .card-description {
+            margin-top: 0.5rem;
+            color: #64748b;
+            text-align: center;
         }
-        input, select {
+
+        .card-content {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .card-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .label {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .input, .select {
+            display: flex;
+            height: 2.5rem;
             width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--input);
+            background-color: transparent;
+            padding: 0 0.75rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
         }
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            background: #007BFF;
+
+        .input:focus, .select:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E" );
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1rem;
+            padding-right: 2rem;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .card-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            height: 2.5rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            background-color: var(--primary);
             color: white;
-            border: none;
-            border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s ease;
+            border: none;
+            transition: background-color 0.2s;
         }
-        button:hover {
-            background: #0056b3;
+
+        .button:hover {
+            background-color: var(--primary-hover);
         }
-        .result {
-            margin-top: 20px;
-            font-weight: bold;
+
+        .button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .error {
+            color: #ef4444;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .success {
+            color: #10b981;
+            font-size: 1rem;
+            font-weight: 600;
             text-align: center;
-            font-size: 18px;
-            color: #333;
-            background: #e9ecef;
-            padding: 12px;
-            border-radius: 5px;
+        }
+
+        .footer-text {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            max-width: 42rem;
         }
     </style>
 </head>
 <body>
+    <main class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Calculadora de Bitola NBR 5410</h1>
+                <p class="card-description">Dimensionamento de condutores elétricos conforme a norma brasileira.</p>
+            </div>
+            <div class="card-content">
+                <!-- Coluna 1 -->
+                <div>
+                    <div class="form-group">
+                        <label class="label" for="potencia">Potência (W)</label>
+                        <input class="input" id="potencia" type="number" placeholder="Ex: 5000" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="tensao">Tensão (V)</label>
+                        <select class="select" id="tensao">
+                            <option value="127">127 V</option>
+                            <option value="220">220 V</option>
+                            <option value="380">380 V</option>
+                            <option value="440">440 V</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="fatorPotencia">Fator de Potência (cos φ)</label>
+                        <input class="input" id="fatorPotencia" type="number" step="0.01" min="0" max="1" placeholder="Ex: 0.92" value="0.92" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="comprimento">Comprimento do Circuito (m)</label>
+                        <input class="input" id="comprimento" type="number" placeholder="Ex: 50" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="tipoIsolacao">Tipo de Isolação</label>
+                        <select class="select" id="tipoIsolacao">
+                            <option value="PVC">PVC (70°C)</option>
+                            <option value="EPR/XLPE">EPR/XLPE (90°C)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="resistividadeTermicaSolo">Resistividade Térmica Solo (K.m/W)</label>
+                        <input class="input" id="resistividadeTermicaSolo" type="number" step="0.1" placeholder="Padrão: 2.5" value="2.5">
+                        <p class="help-text">Relevante apenas para métodos enterrados (61, 62, 63).</p>
+                    </div>
+                </div>
 
-    <div class="container">
-        <h2>Dimensionamento de Condutores - NBR 5410</h2>
-
-        <label for="tensao">Tensão da Rede (V):</label>
-        <input type="number" id="tensao" value="380">
-
-        <label for="potencia">Potência do Equipamento (W):</label>
-        <input type="number" id="potencia" value="5000">
-
-        <label for="corrente">Corrente do Equipamento (A) (Opcional):</label>
-        <input type="number" id="corrente" placeholder="Deixe em branco para cálculo automático">
-
-        <label for="distancia">Distância do Circuito (m):</label>
-        <input type="number" id="distancia" value="100">
-
-        <label for="sistema">Sistema:</label>
-        <select id="sistema">
-            <option value="Monofásico">Monofásico</option>
-            <option value="Bifásico">Bifásico</option>
-            <option value="Trifásico">Trifásico</option>
-        </select>
-
-        <label for="material">Material do Condutor:</label>
-        <select id="material">
-            <option value="Cobre">Cobre</option>
-            <option value="Alumínio">Alumínio</option>
-        </select>
-
-        <label for="metodo">Método de Instalação:</label>
-        <select id="metodo">
-            <option value="B1">B1 - Eletroduto aparente</option>
-            <option value="C">C - Bandejas não perfuradas</option>
-            <option value="D">D - Eletroduto enterrado</option>
-        </select>
-
-        <label for="quedaTensao">Queda de Tensão Máxima Permitida (%):</label>
-        <input type="number" id="quedaTensao" value="4">
-
-        <button onclick="calcularBitola()">Calcular</button>
-
-        <div class="result" id="resultado">Preencha os dados e clique em calcular.</div>
-    </div>
+                <!-- Coluna 2 -->
+                <div>
+                    <div class="form-group">
+                        <label class="label" for="materialCondutor">Material do Condutor</label>
+                        <select class="select" id="materialCondutor">
+                            <option value="cobre">Cobre</option>
+                            <option value="aluminio">Alumínio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="tipoCircuito">Tipo de Circuito</label>
+                        <select class="select" id="tipoCircuito">
+                            <option value="monofasico">Monofásico (2 cond. carregados)</option>
+                            <option value="trifasico">Trifásico (3 cond. carregados)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="metodoInstalacao">Método de Instalação (Tabela 33)</label>
+                        <input class="input" id="metodoInstalacao" type="text" placeholder="Ex: 31 (Cabo multipolar em bandeja)" value="31" required>
+                        <p class="help-text">Ex: 1, 3, 11, 13, 31, 51, 53, 61, 71...</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="temperaturaAmbiente">Temperatura Ambiente (°C)</label>
+                        <input class="input" id="temperaturaAmbiente" type="number" placeholder="Padrão: 30°C (ar), 20°C (solo)" value="30" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="label" for="numCircuitosAgrupados">Nº Circuitos Agrupados</label>
+                        <input class="input" id="numCircuitosAgrupados" type="number" min="1" step="1" placeholder="Ex: 1" value="1" required>
+                    </div>
+                    <div class="form-group" id="agrupamentoTipoContainer">
+                        <label class="label" for="agrupamentoTipo">Tipo de Agrupamento (Tabela 42)</label>
+                        <select class="select" id="agrupamentoTipo">
+                            <option value="feixe">Em feixe (Ref. 1)</option>
+                            <option value="sobreposicao">Camada única sobre parede/bandeja não perf. (Ref. 2)</option>
+                            <option value="teto">Camada única no teto (Ref. 3)</option>
+                            <option value="bandeja_perfurada">Camada única em bandeja perfurada (Ref. 4)</option>
+                            <option value="leito">Camada única sobre leito/suporte (Ref. 5)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="distanciaEnterradoContainer" style="display: none;">
+                        <label class="label" for="distanciaEnterrado">Distância entre Cabos/Eletrodutos Enterrados (Tabelas 44/45)</label>
+                        <select class="select" id="distanciaEnterrado">
+                            <option value="dist_nula">Nula (Cabos diretamente enterrados)</option>
+                            <option value="dist_diam">Um diâmetro (Cabos diretamente enterrados)</option>
+                            <option value="dist_0125">0,125 m (Cabos diretamente enterrados)</option>
+                            <option value="dist_025">0,25 m</option>
+                            <option value="dist_05">0,5 m</option>
+                            <option value="dist_1">1 m (Eletrodutos enterrados)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button id="calcularBtn" class="button">Calcular Bitola</button>
+                <div id="erro" class="error" style="display: none;"></div>
+                <div id="resultado" class="success" style="display: none;"></div>
+            </div>
+        </div>
+        <p class="footer-text">
+            Nota: Esta calculadora fornece uma estimativa baseada na NBR 5410. Consulte sempre um profissional qualificado para projetos elétricos.
+            <br>
+            A tabela de queda de tensão utilizada é simplificada. Para cálculos precisos, consulte as tabelas 46 e 47 completas da norma.
+        </p>
+    </main>
 
     <script>
-        function calcularBitola() {
-            let tensao = parseFloat(document.getElementById("tensao").value);
-            let potenciaW = parseFloat(document.getElementById("potencia").value);
-            let correnteInput = document.getElementById("corrente").value;
-            let distancia = parseFloat(document.getElementById("distancia").value);
-            let sistema = document.getElementById("sistema").value;
-            let material = document.getElementById("material").value;
-            let metodo = document.getElementById("metodo").value;
-            let quedaTensao = parseFloat(document.getElementById("quedaTensao").value);
+        // --- Dados das Tabelas NBR 5410 --- 
 
-            let corrente;
-            if (correnteInput) {
-                corrente = parseFloat(correnteInput);
-            } else {
-                let potenciaVA = potenciaW / 0.8;
-                let fatorSistema = sistema === "Monofásico" ? 1 : Math.sqrt(3);
-                corrente = potenciaVA / (fatorSistema * tensao);
+        // Tabela 33 (Simplificada - Mapeamento Método de Instalação -> Método de Referência)
+        const metodoReferenciaMap = {
+            '1': 'A1', '2': 'A1', '3': 'A2', '4': 'A2', // Embutido em alvenaria
+            '11': 'B1', '12': 'B1', '13': 'B2', '14': 'B2', // Sobre parede
+            '31': 'C', '32': 'C', '33': 'C', '34': 'C', '35': 'C', // Em bandeja
+            '51': 'B1', '52': 'B1', '53': 'B2', // Em espaço de construção
+            '61': 'D', '62': 'D', '63': 'D', // Enterrado
+            '71': 'E', '72': 'F', '73': 'F', '74': 'F', // Ao ar livre
+            // Adicionar outros métodos conforme necessário
+        };
+
+        // Tabela 36: Capacidade (PVC, 70°C)
+        const tabela36 = {
+            'cobre': {
+                'A1': { '2': { 0.5: 7, 0.75: 9, 1: 11, 1.5: 14.5, 2.5: 19.5, 4: 26, 6: 34, 10: 46, 16: 61, 25: 80, 35: 99, 50: 119, 70: 151, 95: 182, 120: 210, 150: 240, 185: 273, 240: 321, 300: 367, 400: 438, 500: 502, 630: 578, 800: 669, 1000: 767 }, '3': { 0.5: 7, 0.75: 9, 1: 10, 1.5: 13.5, 2.5: 18, 4: 24, 6: 31, 10: 42, 16: 56, 25: 73, 35: 89, 50: 108, 70: 136, 95: 164, 120: 188, 150: 216, 185: 245, 240: 286, 300: 328, 400: 390, 500: 447, 630: 514, 800: 593, 1000: 679 } },
+                'A2': { '2': { 0.5: 7, 0.75: 9, 1: 11, 1.5: 14, 2.5: 18.5, 4: 25, 6: 32, 10: 43, 16: 57, 25: 75, 35: 92, 50: 110, 70: 139, 95: 167, 120: 192, 150: 219, 185: 248, 240: 291, 300: 334, 400: 398, 500: 456, 630: 526, 800: 609, 1000: 698 }, '3': { 0.5: 7, 0.75: 9, 1: 10, 1.5: 13, 2.5: 17.5, 4: 23, 6: 29, 10: 39, 16: 52, 25: 68, 35: 83, 50: 99, 70: 125, 95: 150, 120: 172, 150: 196, 185: 223, 240: 261, 300: 298, 400: 355, 500: 406, 630: 467, 800: 540, 1000: 618 } },
+                'B1': { '2': { 0.5: 9, 0.75: 11, 1: 14, 1.5: 17.5, 2.5: 24, 4: 32, 6: 41, 10: 57, 16: 76, 25: 101, 35: 125, 50: 151, 70: 192, 95: 232, 120: 269, 150: 309, 185: 353, 240: 415, 300: 477, 400: 571, 500: 656, 630: 758, 800: 881, 1000: 1012 }, '3': { 0.5: 8, 0.75: 10, 1: 12, 1.5: 15.5, 2.5: 21, 4: 28, 6: 36, 10: 50, 16: 68, 25: 89, 35: 110, 50: 134, 70: 171, 95: 207, 120: 239, 150: 275, 185: 314, 240: 370, 300: 426, 400: 510, 500: 587, 630: 678, 800: 788, 1000: 906 } },
+                'B2': { '2': { 0.5: 9, 0.75: 11, 1: 13, 1.5: 16.5, 2.5: 23, 4: 30, 6: 38, 10: 52, 16: 69, 25: 90, 35: 111, 50: 133, 70: 168, 95: 201, 120: 232, 150: 265, 185: 300, 240: 351, 300: 401, 400: 477, 500: 545, 630: 626, 800: 723, 1000: 827 }, '3': { 0.5: 8, 0.75: 10, 1: 12, 1.5: 15, 2.5: 20, 4: 27, 6: 34, 10: 46, 16: 62, 25: 80, 35: 99, 50: 118, 70: 149, 95: 179, 120: 206, 150: 236, 185: 268, 240: 313, 300: 358, 400: 425, 500: 486, 630: 559, 800: 645, 1000: 738 } },
+                'C': { '2': { 0.5: 10, 0.75: 13, 1: 15, 1.5: 19.5, 2.5: 27, 4: 36, 6: 46, 10: 63, 16: 85, 25: 112, 35: 138, 50: 168, 70: 213, 95: 258, 120: 299, 150: 344, 185: 392, 240: 461, 300: 530, 400: 634, 500: 729, 630: 843, 800: 978, 1000: 1125 }, '3': { 0.5: 9, 0.75: 11, 1: 14, 1.5: 17.5, 2.5: 24, 4: 32, 6: 41, 10: 57, 16: 76, 25: 96, 35: 119, 50: 144, 70: 184, 95: 223, 120: 259, 150: 299, 185: 341, 240: 403, 300: 464, 400: 557, 500: 642, 630: 743, 800: 865, 1000: 996 } },
+                'D': { '2': { 1.5: 22, 2.5: 29, 4: 38, 6: 47, 10: 63, 16: 81, 25: 104, 35: 125, 50: 148, 70: 183, 95: 216, 120: 246, 150: 278, 185: 312, 240: 361, 300: 408, 400: 478, 500: 540, 630: 614, 800: 700, 1000: 792 }, '3': { 1.5: 18, 2.5: 24, 4: 31, 6: 39, 10: 52, 16: 67, 25: 86, 35: 103, 50: 122, 70: 151, 95: 179, 120: 203, 150: 230, 185: 258, 240: 297, 300: 336, 400: 394, 500: 445, 630: 506, 800: 577, 1000: 652 } }
+            },
+            'aluminio': {
+                'A1': { '2': {}, '3': {} }, // Preencher se necessário
+                'A2': { '2': {}, '3': {} }, // Preencher se necessário
+                'B1': { '2': { 16: 48, 25: 63, 35: 77, 50: 93, 70: 118, 95: 142, 120: 164, 150: 189, 185: 215, 240: 252, 300: 289, 400: 345, 500: 396, 630: 456, 800: 529, 1000: 607 }, '3': { 16: 43, 25: 57, 35: 70, 50: 84, 70: 107, 95: 129, 120: 149, 150: 170, 185: 194, 240: 227, 300: 261, 400: 311, 500: 356, 630: 410, 800: 475, 1000: 544 } },
+                'B2': { '2': { 16: 44, 25: 58, 35: 71, 50: 86, 70: 108, 95: 130, 120: 150, 150: 172, 185: 195, 240: 229, 300: 263, 400: 314, 500: 360, 630: 416, 800: 482, 1000: 552 }, '3': { 16: 41, 25: 53, 35: 65, 50: 78, 70: 98, 95: 118, 120: 135, 150: 155, 185: 176, 240: 207, 300: 237, 400: 283, 500: 324, 630: 373, 800: 432, 1000: 495 } },
+                'C': { '2': { 16: 60, 25: 79, 35: 97, 50: 118, 70: 150, 95: 181, 120: 210, 150: 241, 185: 275, 240: 324, 300: 372, 400: 446, 500: 512, 630: 592, 800: 687, 1000: 790 }, '3': { 16: 53, 25: 70, 35: 86, 50: 104, 70: 133, 95: 161, 120: 186, 150: 214, 185: 245, 240: 288, 300: 331, 400: 397, 500: 456, 630: 527, 800: 612, 1000: 704 } },
+                'D': { '2': { 16: 54, 25: 71, 35: 86, 50: 104, 70: 131, 95: 157, 120: 181, 150: 206, 185: 234, 240: 274, 300: 313, 400: 372, 500: 425, 630: 488, 800: 563, 1000: 643 }, '3': { 16: 48, 25: 62, 35: 77, 50: 92, 70: 116, 95: 139, 120: 160, 150: 183, 185: 208, 240: 243, 300: 278, 400: 331, 500: 378, 630: 435, 800: 502, 1000: 574 } }
+            }
+        };
+
+        // Tabela 37: Capacidade (EPR/XLPE, 90°C)
+        const tabela37 = {
+            'cobre': {
+                'A1': { '2': { 0.5: 10, 0.75: 12, 1: 15, 1.5: 19, 2.5: 26, 4: 35, 6: 45, 10: 61, 16: 81, 25: 106, 35: 131, 50: 158, 70: 200, 95: 241, 120: 278, 150: 318, 185: 362, 240: 424, 300: 486, 400: 579, 500: 664, 630: 765, 800: 885, 1000: 1014 }, '3': { 0.5: 9, 0.75: 11, 1: 13, 1.5: 17, 2.5: 23, 4: 31, 6: 40, 10: 54, 16: 73, 25: 95, 35: 117, 50: 141, 70: 179, 95: 216, 120: 249, 150: 285, 185: 324, 240: 380, 300: 435, 400: 519, 500: 595, 630: 685, 800: 792, 1000: 908 } },
+                'A2': { '2': { 0.5: 10, 0.75: 12, 1: 14, 1.5: 18.5, 2.5: 25, 4: 33, 6: 42, 10: 57, 16: 76, 25: 99, 35: 121, 50: 145, 70: 183, 95: 220, 120: 253, 150: 290, 185: 329, 240: 386, 300: 442, 400: 527, 500: 604, 630: 696, 800: 805, 1000: 923 }, '3': { 0.5: 9, 0.75: 11, 1: 13, 1.5: 16.5, 2.5: 22, 4: 30, 6: 38, 10: 51, 16: 68, 25: 89, 35: 109, 50: 130, 70: 164, 95: 197, 120: 227, 150: 259, 185: 295, 240: 346, 300: 396, 400: 472, 500: 541, 630: 623, 800: 721, 1000: 826 } },
+                'B1': { '2': { 0.5: 12, 0.75: 15, 1: 18, 1.5: 23, 2.5: 31, 4: 42, 6: 54, 10: 75, 16: 100, 25: 133, 35: 164, 50: 198, 70: 253, 95: 306, 120: 354, 150: 407, 185: 464, 240: 546, 300: 628, 400: 751, 500: 864, 630: 998, 800: 1158, 1000: 1332 }, '3': { 0.5: 10, 0.75: 13, 1: 16, 1.5: 20, 2.5: 28, 4: 37, 6: 48, 10: 66, 16: 88, 25: 117, 35: 144, 50: 175, 70: 222, 95: 269, 120: 312, 150: 358, 185: 408, 240: 481, 300: 553, 400: 661, 500: 760, 630: 879, 800: 1020, 1000: 1173 } },
+                'B2': { '2': { 0.5: 11, 0.75: 15, 1: 17, 1.5: 22, 2.5: 30, 4: 40, 6: 51, 10: 69, 16: 91, 25: 119, 35: 146, 50: 175, 70: 221, 95: 265, 120: 305, 150: 349, 185: 395, 240: 462, 300: 529, 400: 628, 500: 718, 630: 825, 800: 952, 1000: 1088 }, '3': { 0.5: 10, 0.75: 13, 1: 15, 1.5: 19.5, 2.5: 26, 4: 35, 6: 44, 10: 60, 16: 80, 25: 105, 35: 128, 50: 154, 70: 194, 95: 233, 120: 268, 150: 307, 185: 348, 240: 407, 300: 465, 400: 552, 500: 631, 630: 725, 800: 837, 1000: 957 } },
+                'C': { '2': { 0.5: 12, 0.75: 16, 1: 19, 1.5: 24, 2.5: 33, 4: 45, 6: 58, 10: 80, 16: 107, 25: 138, 35: 171, 50: 209, 70: 269, 95: 328, 120: 382, 150: 441, 185: 506, 240: 599, 300: 693, 400: 835, 500: 966, 630: 1122, 800: 1311, 1000: 1515 }, '3': { 0.5: 11, 0.75: 14, 1: 17, 1.5: 22, 2.5: 30, 4: 40, 6: 52, 10: 71, 16: 96, 25: 119, 35: 147, 50: 179, 70: 229, 95: 278, 120: 322, 150: 371, 185: 424, 240: 500, 300: 576, 400: 692, 500: 797, 630: 923, 800: 1074, 1000: 1237 } },
+                'D': { '2': { 1.5: 26, 2.5: 34, 4: 44, 6: 56, 10: 73, 16: 95, 25: 121, 35: 146, 50: 173, 70: 213, 95: 252, 120: 287, 150: 324, 185: 363, 240: 419, 300: 474, 400: 555, 500: 627, 630: 711, 800: 811, 1000: 916 }, '3': { 1.5: 22, 2.5: 29, 4: 37, 6: 46, 10: 61, 16: 79, 25: 101, 35: 122, 50: 144, 70: 178, 95: 211, 120: 240, 150: 271, 185: 304, 240: 351, 300: 396, 400: 464, 500: 525, 630: 596, 800: 679, 1000: 767 } }
+            },
+            'aluminio': {
+                'A1': { '2': {}, '3': {} }, // Preencher se necessário
+                'A2': { '2': {}, '3': {} }, // Preencher se necessário
+                'B1': { '2': { 16: 64, 25: 84, 35: 103, 50: 125, 70: 158, 95: 191, 120: 220, 150: 253, 185: 288, 240: 338, 300: 387, 400: 462, 500: 530, 630: 611, 800: 708, 1000: 812 }, '3': { 16: 58, 25: 76, 35: 94, 50: 113, 70: 142, 95: 171, 120: 197, 150: 226, 185: 256, 240: 300, 300: 344, 400: 409, 500: 468, 630: 538, 800: 622, 1000: 712 } },
+                'B2': { '2': { 16: 60, 25: 78, 35: 96, 50: 115, 70: 145, 95: 175, 120: 201, 150: 230, 185: 262, 240: 307, 300: 352, 400: 421, 500: 483, 630: 556, 800: 644, 1000: 739 }, '3': { 16: 55, 25: 71, 35: 87, 50: 104, 70: 131, 95: 157, 120: 180, 150: 206, 185: 233, 240: 273, 300: 313, 400: 372, 500: 426, 630: 490, 800: 566, 1000: 648 } },
+                'C': { '2': { 16: 79, 25: 105, 35: 130, 50: 157, 70: 200, 95: 242, 120: 281, 150: 323, 185: 368, 240: 433, 300: 499, 400: 597, 500: 687, 630: 794, 800: 922, 1000: 1061 }, '3': { 16: 71, 25: 93, 35: 116, 50: 140, 70: 179, 95: 217, 120: 251, 150: 289, 185: 330, 240: 389, 300: 447, 400: 536, 500: 617, 630: 714, 800: 830, 1000: 955 } },
+                'D': { '2': { 16: 72, 25: 94, 35: 115, 50: 138, 70: 175, 95: 210, 120: 242, 150: 277, 185: 314, 240: 368, 300: 421, 400: 500, 500: 573, 630: 658, 800: 760, 1000: 870 }, '3': { 16: 64, 25: 84, 35: 103, 50: 124, 70: 156, 95: 188, 120: 216, 150: 248, 185: 281, 240: 329, 300: 377, 400: 448, 500: 513, 630: 590, 800: 682, 1000: 780 } }
+            }
+        };
+
+        // Tabela 38: Capacidade (PVC, 70°C, Métodos E, F, G)
+        const tabela38 = {
+            'cobre': {
+                'E': { '2': { 0.5: 11, 0.75: 14, 1: 17, 1.5: 22, 2.5: 31, 4: 41, 6: 53, 10: 73, 16: 99, 25: 131, 35: 162, 50: 196, 70: 251, 95: 304, 120: 352, 150: 406, 185: 463, 240: 546, 300: 629, 400: 754, 500: 868, 630: 1005, 800: 1169, 1000: 1346 }, '3': { 0.5: 9, 0.75: 11, 1: 14, 1.5: 18, 2.5: 25, 4: 34, 6: 45, 10: 63, 16: 85, 25: 114, 35: 143, 50: 174, 70: 225, 95: 275, 120: 321, 150: 372, 185: 427, 240: 507, 300: 587, 400: 689, 500: 789, 630: 905, 800: 1119, 1000: 1296 } },
+                'F': { '2': { 0.5: 12, 0.75: 16, 1: 19, 1.5: 24, 2.5: 34, 4: 45, 6: 59, 10: 81, 16: 110, 25: 146, 35: 181, 50: 219, 70: 281, 95: 341, 120: 396, 150: 456, 185: 521, 240: 615, 300: 709, 400: 852, 500: 982, 630: 1138, 800: 1325, 1000: 1528 }, '3': { 0.5: 10, 0.75: 13, 1: 16, 1.5: 21, 2.5: 29, 4: 39, 6: 51, 10: 71, 16: 97, 25: 130, 35: 162, 50: 197, 70: 254, 95: 311, 120: 362, 150: 419, 185: 480, 240: 569, 300: 659, 400: 795, 500: 920, 630: 1070, 800: 1251, 1000: 1448 } }, // Inclui Justapostos e Trifólio
+                'G': { '2': {}, '3': { 0.5: 11, 0.75: 14, 1: 17, 1.5: 22, 2.5: 30, 4: 40, 6: 51, 10: 70, 16: 94, 25: 119, 35: 148, 50: 180, 70: 232, 95: 282, 120: 328, 150: 379, 185: 434, 240: 514, 300: 593, 400: 715, 500: 826, 630: 958, 800: 1118, 1000: 1292 } } // Horizontal e Vertical
+            },
+            'aluminio': {
+                'E': { '2': { 16: 73, 25: 98, 35: 122, 50: 149, 70: 192, 95: 235, 120: 273, 150: 316, 185: 363, 240: 430, 300: 497, 400: 600, 500: 694, 630: 808, 800: 944, 1000: 1092 }, '3': { 16: 65, 25: 87, 35: 109, 50: 133, 70: 173, 95: 212, 120: 247, 150: 287, 185: 330, 240: 392, 300: 455, 400: 552, 500: 640, 630: 745, 800: 875, 1000: 1015 } },
+                'F': { '2': { 16: 84, 25: 112, 35: 139, 50: 169, 70: 217, 95: 265, 120: 308, 150: 356, 185: 407, 240: 482, 300: 557, 400: 671, 500: 775, 630: 900, 800: 1050, 1000: 1213 }, '3': { 16: 73, 25: 99, 35: 124, 50: 152, 70: 196, 95: 241, 120: 282, 150: 327, 185: 376, 240: 447, 300: 519, 400: 629, 500: 730, 630: 850, 800: 1000, 1000: 1161 } }, // Inclui Justapostos e Trifólio
+                'G': { '2': {}, '3': { 16: 73, 25: 89, 35: 111, 50: 135, 70: 173, 95: 210, 120: 244, 150: 282, 185: 322, 240: 380, 300: 439, 400: 528, 500: 608, 630: 705, 800: 822, 1000: 948 } } // Horizontal e Vertical
+            }
+        };
+
+        // Tabela 39: Capacidade (EPR/XLPE, 90°C, Métodos E, F, G)
+        const tabela39 = {
+            'cobre': {
+                'E': { '2': { 0.5: 13, 0.75: 17, 1: 21, 1.5: 26, 2.5: 36, 4: 49, 6: 63, 10: 86, 16: 115, 25: 149, 35: 185, 50: 225, 70: 289, 95: 352, 120: 410, 150: 473, 185: 542, 240: 641, 300: 741, 400: 892, 500: 1030, 630: 1196, 800: 1396, 1000: 1613 }, '3': { 0.5: 10, 0.75: 14, 1: 17, 1.5: 22, 2.5: 30, 4: 42, 6: 55, 10: 77, 16: 105, 25: 141, 35: 176, 50: 216, 70: 279, 95: 342, 120: 400, 150: 464, 185: 533, 240: 634, 300: 736, 400: 868, 500: 998, 630: 1151, 800: 1328, 1000: 1511 } },
+                'F': { '2': { 0.5: 15, 0.75: 19, 1: 23, 1.5: 30, 2.5: 41, 4: 56, 6: 73, 10: 101, 16: 137, 25: 182, 35: 226, 50: 275, 70: 353, 95: 430, 120: 500, 150: 577, 185: 661, 240: 781, 300: 902, 400: 1085, 500: 1253, 630: 1454, 800: 1696, 1000: 1958 }, '3': { 0.5: 12, 0.75: 16, 1: 19, 1.5: 25, 2.5: 35, 4: 48, 6: 63, 10: 88, 16: 120, 25: 161, 35: 201, 50: 246, 70: 318, 95: 389, 120: 454, 150: 527, 185: 605, 240: 719, 300: 833, 400: 1008, 500: 1169, 630: 1362, 800: 1595, 1000: 1849 } }, // Inclui Justapostos e Trifólio
+                'G': { '2': {}, '3': { 0.5: 13, 0.75: 17, 1: 21, 1.5: 27, 2.5: 37, 4: 50, 6: 65, 10: 90, 16: 121, 25: 161, 35: 200, 50: 242, 70: 310, 95: 377, 120: 437, 150: 504, 185: 575, 240: 679, 300: 783, 400: 940, 500: 1083, 630: 1254, 800: 1460, 1000: 1683 } } // Horizontal e Vertical
+            },
+            'aluminio': {
+                'E': { '2': { 16: 91, 25: 108, 35: 135, 50: 164, 70: 211, 95: 257, 120: 300, 150: 346, 185: 397, 240: 470, 300: 543, 400: 654, 500: 756, 630: 879, 800: 1026, 1000: 1186 }, '3': { 16: 76, 25: 103, 35: 129, 50: 159, 70: 206, 95: 253, 120: 296, 150: 343, 185: 395, 240: 471, 300: 547, 400: 663, 500: 770, 630: 899, 800: 1056, 1000: 1226 } },
+                'F': { '2': { 16: 103, 25: 138, 35: 172, 50: 210, 70: 271, 95: 332, 120: 387, 150: 448, 185: 515, 240: 611, 300: 708, 400: 856, 500: 991, 630: 1154, 800: 1351, 1000: 1565 }, '3': { 16: 90, 25: 122, 35: 153, 50: 188, 70: 244, 95: 300, 120: 351, 150: 408, 185: 470, 240: 561, 300: 652, 400: 792, 500: 921, 630: 1077, 800: 1266, 1000: 1472 } }, // Inclui Justapostos e Trifólio
+                'G': { '2': {}, '3': { 16: 90, 25: 121, 35: 150, 50: 184, 70: 237, 95: 289, 120: 337, 150: 389, 185: 447, 240: 530, 300: 613, 400: 740, 500: 856, 630: 996, 800: 1164, 1000: 1347 } } // Horizontal e Vertical
+            }
+        };
+
+        // Tabela 40: Fatores de Correção de Temperatura
+        const tabela40 = {
+            'ar': {
+                'PVC': { 10: 1.22, 15: 1.17, 20: 1.12, 25: 1.06, 30: 1.00, 35: 0.94, 40: 0.87, 45: 0.79, 50: 0.71, 55: 0.61, 60: 0.50 },
+                'EPR/XLPE': { 10: 1.15, 15: 1.12, 20: 1.08, 25: 1.04, 30: 1.00, 35: 0.96, 40: 0.91, 45: 0.87, 50: 0.82, 55: 0.76, 60: 0.71, 65: 0.65, 70: 0.58, 75: 0.50, 80: 0.41 }
+            },
+            'solo': {
+                'PVC': { 10: 1.10, 15: 1.05, 20: 1.00, 25: 0.95, 30: 0.89, 35: 0.84, 40: 0.77, 45: 0.71, 50: 0.63, 55: 0.55, 60: 0.45 },
+                'EPR/XLPE': { 10: 1.07, 15: 1.04, 20: 1.00, 25: 0.96, 30: 0.93, 35: 0.89, 40: 0.85, 45: 0.80, 50: 0.76, 55: 0.71, 60: 0.65, 65: 0.60, 70: 0.53, 75: 0.46, 80: 0.38 }
+            }
+        };
+
+        // Tabela 41: Fatores de Correção de Resistividade Térmica do Solo (K.m/W)
+        const tabela41 = {
+            1.0: 1.18,
+            1.5: 1.10,
+            2.0: 1.05,
+            2.5: 1.00, // Referência
+            3.0: 0.96
+        };
+
+        // Tabela 42: Fatores de Correção de Agrupamento (Camada Única)
+        const tabela42 = {
+            'feixe': { 1: 1.00, 2: 0.80, 3: 0.70, 4: 0.65, 5: 0.60, 6: 0.57, 7: 0.54, 8: 0.52, 9: 0.50, 12: 0.45, 16: 0.41, 20: 0.38 }, // Linha 1
+            'sobreposicao': { 1: 1.00, 2: 0.85, 3: 0.79, 4: 0.75, 5: 0.73, 6: 0.72, 7: 0.72, 8: 0.71, 9: 0.70 }, // Linha 2 (bandeja não perfurada)
+            'teto': { 1: 0.95, 2: 0.81, 3: 0.72, 4: 0.68, 5: 0.66, 6: 0.64, 7: 0.63, 8: 0.62, 9: 0.61 }, // Linha 3
+            'bandeja_perfurada': { 1: 1.00, 2: 0.88, 3: 0.82, 4: 0.77, 5: 0.75, 6: 0.73, 7: 0.73, 8: 0.72, 9: 0.72 }, // Linha 4
+            'leito': { 1: 1.00, 2: 0.87, 3: 0.82, 4: 0.80, 5: 0.80, 6: 0.79, 7: 0.79, 8: 0.78, 9: 0.78 } // Linha 5
+        };
+
+        // Tabela 44: Fatores de Agrupamento (Cabos Diretamente Enterrados)
+        const tabela44 = {
+            'dist_nula': { 2: 0.75, 3: 0.65, 4: 0.60, 5: 0.55, 6: 0.50 },
+            'dist_diam': { 2: 0.80, 3: 0.70, 4: 0.60, 5: 0.55, 6: 0.55 },
+            'dist_0125': { 2: 0.85, 3: 0.75, 4: 0.70, 5: 0.65, 6: 0.60 },
+            'dist_025': { 2: 0.90, 3: 0.80, 4: 0.75, 5: 0.70, 6: 0.70 },
+            'dist_05': { 2: 0.90, 3: 0.85, 4: 0.80, 5: 0.80, 6: 0.80 }
+        };
+
+        // Tabela 45: Fatores de Agrupamento (Eletrodutos Enterrados)
+        const tabela45 = {
+            'dist_025': { 2: 0.85, 3: 0.75, 4: 0.70, 5: 0.65, 6: 0.60 },
+            'dist_05': { 2: 0.90, 3: 0.85, 4: 0.80, 5: 0.75, 6: 0.75 },
+            'dist_1': { 2: 0.95, 3: 0.90, 4: 0.85, 5: 0.85, 6: 0.80 }
+        };
+
+        // Tabela 46: Queda de Tensão (Simplificada - valores exemplo)
+        const tabelaQuedaTensao = {
+            'cobre': {
+                'monofasico': { 1.5: 25, 2.5: 15, 4: 9.4, 6: 6.3, 10: 3.8, 16: 2.4, 25: 1.5, 35: 1.1, 50: 0.79, 70: 0.56, 95: 0.41, 120: 0.32, 150: 0.26, 185: 0.21, 240: 0.16, 300: 0.13 },
+                'trifasico': { 1.5: 22, 2.5: 13, 4: 8.1, 6: 5.4, 10: 3.3, 16: 2.1, 25: 1.3, 35: 0.92, 50: 0.68, 70: 0.49, 95: 0.36, 120: 0.28, 150: 0.22, 185: 0.18, 240: 0.14, 300: 0.11 }
+            },
+            'aluminio': {
+                'monofasico': { 16: 3.9, 25: 2.5, 35: 1.8, 50: 1.3, 70: 0.92, 95: 0.67, 120: 0.53, 150: 0.42, 185: 0.34, 240: 0.26, 300: 0.21 },
+                'trifasico': { 16: 3.4, 25: 2.1, 35: 1.5, 50: 1.1, 70: 0.80, 95: 0.58, 120: 0.46, 150: 0.37, 185: 0.30, 240: 0.23, 300: 0.18 }
+            }
+        };
+
+        // Seções Nominais Padrão (mm²)
+        const secoesPadrao = [0.5, 0.75, 1, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630, 800, 1000];
+
+        // Elementos do DOM
+        const potenciaInput = document.getElementById('potencia');
+        const tensaoSelect = document.getElementById('tensao');
+        const fatorPotenciaInput = document.getElementById('fatorPotencia');
+        const comprimentoInput = document.getElementById('comprimento');
+        const materialCondutorSelect = document.getElementById('materialCondutor');
+        const tipoCircuitoSelect = document.getElementById('tipoCircuito');
+        const metodoInstalacaoInput = document.getElementById('metodoInstalacao');
+        const temperaturaAmbienteInput = document.getElementById('temperaturaAmbiente');
+        const numCircuitosAgrupadosInput = document.getElementById('numCircuitosAgrupados');
+        const tipoIsolacaoSelect = document.getElementById('tipoIsolacao');
+        const resistividadeTermicaSoloInput = document.getElementById('resistividadeTermicaSolo');
+        const agrupamentoTipoSelect = document.getElementById('agrupamentoTipo');
+        const distanciaEnterradoSelect = document.getElementById('distanciaEnterrado');
+        const agrupamentoTipoContainer = document.getElementById('agrupamentoTipoContainer');
+        const distanciaEnterradoContainer = document.getElementById('distanciaEnterradoContainer');
+        const calcularBtn = document.getElementById('calcularBtn');
+        const erroDiv = document.getElementById('erro');
+        const resultadoDiv = document.getElementById('resultado');
+
+        // Função para mostrar/esconder campos de agrupamento baseado no método de instalação
+        function atualizarCamposAgrupamento() {
+            const metodoInstalacao = metodoInstalacaoInput.value;
+            const numCircuitos = parseInt(numCircuitosAgrupadosInput.value) || 1;
+            const isEnterrado = ['61', '62', '63'].includes(metodoInstalacao);
+
+            // Esconde ambos por padrão
+            agrupamentoTipoContainer.style.display = 'none';
+            distanciaEnterradoContainer.style.display = 'none';
+
+            // Mostra o apropriado se houver mais de 1 circuito
+            if (numCircuitos > 1) {
+                if (isEnterrado) {
+                    distanciaEnterradoContainer.style.display = 'block';
+                } else {
+                    agrupamentoTipoContainer.style.display = 'block';
+                }
             }
 
-            let resistividade = { "Cobre": 135, "Alumínio": 70 }[material];
-
-            let bitolaQueda = (200 * corrente * distancia) / (resistividade * tensao * quedaTensao);
-            let bitolaMinima = 2.5;
-
-            let bitolasComerciais = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240];
-            let bitolaFinal = bitolasComerciais.find(b => b >= Math.max(bitolaQueda, bitolaMinima)) || bitolasComerciais[bitolasComerciais.length - 1];
-
-            let condutorTerra = bitolaFinal <= 16 ? bitolaFinal : (bitolaFinal <= 35 ? 16 : bitolasComerciais.find(b => b >= bitolaFinal / 2));
-            let condutorNeutro = bitolaFinal <= 25 ? bitolaFinal : 25;
-
-            document.getElementById("resultado").innerHTML = `
-                <b>Bitola Recomendada (Fase): ${bitolaFinal} mm²</b><br>
-                <b>Condutor Terra (PE): ${condutorTerra} mm²</b><br>
-                <b>Condutor Neutro (N): ${condutorNeutro} mm²</b><br>
-                <b>Corrente Considerada: ${corrente.toFixed(2)} A</b><br>
-                <b>Critério de Queda de Tensão: ${bitolaQueda.toFixed(2)} mm²</b><br>
-                <b>Cabos Considerados: Afumex Flex 0,6/1kV, HEPR, 90°C</b>
-            `;
+            // Atualiza opções do distanciaEnterrado baseado no método (D ou não)
+            const metodoRef = metodoReferenciaMap[metodoInstalacao] || 'C';
+            if (metodoRef === 'D') {
+                // Remove opções específicas para cabos diretamente enterrados
+                Array.from(distanciaEnterradoSelect.options).forEach(option => {
+                    if (['dist_nula', 'dist_diam', 'dist_0125'].includes(option.value)) {
+                        option.disabled = true;
+                    }
+                });
+            } else {
+                // Habilita todas as opções
+                Array.from(distanciaEnterradoSelect.options).forEach(option => {
+                    option.disabled = false;
+                });
+            }
         }
-    </script>
 
+        // Adiciona event listeners para atualizar campos de agrupamento
+        metodoInstalacaoInput.addEventListener('change', atualizarCamposAgrupamento);
+        numCircuitosAgrupadosInput.addEventListener('change', atualizarCamposAgrupamento);
+
+        // Inicializa os campos de agrupamento
+        atualizarCamposAgrupamento();
+
+        // Função principal de cálculo
+        function calcularBitola() {
+            erroDiv.style.display = 'none';
+            resultadoDiv.style.display = 'none';
+
+            // Validação de campos obrigatórios
+            if (!potenciaInput.value || !tensaoSelect.value || !fatorPotenciaInput.value || !comprimentoInput.value || !temperaturaAmbienteInput.value || !numCircuitosAgrupadosInput.value) {
+                erroDiv.textContent = "Por favor, preencha todos os campos obrigatórios.";
+                erroDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const pot = Number(potenciaInput.value);
+                const ten = Number(tensaoSelect.value);
+                const fp = Number(fatorPotenciaInput.value);
+                const comp = Number(comprimentoInput.value);
+                const tempAmb = Number(temperaturaAmbienteInput.value);
+                const numCirc = Number(numCircuitosAgrupadosInput.value);
+                const resSolo = Number(resistividadeTermicaSoloInput.value);
+                const materialCondutor = materialCondutorSelect.value;
+                const tipoCircuito = tipoCircuitoSelect.value;
+                const metodoInstalacao = metodoInstalacaoInput.value;
+                const tipoIsolacao = tipoIsolacaoSelect.value;
+                const agrupamentoTipo = agrupamentoTipoSelect.value;
+                const distanciaEnterrado = distanciaEnterradoSelect.value;
+
+                // 1. Cálculo da Corrente de Projeto (Ib)
+                let correnteProjeto;
+                if (tipoCircuito === 'monofasico') {
+                    correnteProjeto = pot / (ten * fp);
+                } else { // trifasico
+                    correnteProjeto = pot / (ten * fp * Math.sqrt(3));
+                }
+
+                // 2. Determinar Método de Referência
+                const metodoRef = metodoReferenciaMap[metodoInstalacao] || 'C'; // Default para 'C' se não encontrado
+                const isEnterrado = ['61', '62', '63'].includes(metodoInstalacao);
+                const ambiente = isEnterrado ? 'solo' : 'ar';
+                const tempRef = isEnterrado ? 20 : 30;
+
+                // 3. Fator de Correção de Temperatura (FCT ou K1)
+                const tabelaTemp = tabela40[ambiente][tipoIsolacao];
+                let tempProxima = tempAmb;
+                if (!(tempAmb in tabelaTemp)) {
+                    // Encontra a temperatura mais próxima na tabela
+                    const tempsDisponiveis = Object.keys(tabelaTemp).map(Number);
+                    tempProxima = tempsDisponiveis.reduce((prev, curr) =>
+                        Math.abs(curr - tempAmb) < Math.abs(prev - tempAmb) ? curr : prev
+                    );
+                    console.warn(`Temperatura ambiente ${tempAmb}°C não encontrada na Tabela 40. Usando ${tempProxima}°C.`);
+                }
+                const fct = tabelaTemp[tempProxima] || 1.0;
+
+                // 4. Fator de Correção de Agrupamento (FCA ou K2)
+                let fca = 1.0;
+                if (numCirc > 1) {
+                    if (isEnterrado) {
+                        if (metodoRef === 'D') { // Eletrodutos enterrados (Tabela 45)
+                            const tabelaDist = tabela45[distanciaEnterrado];
+                            fca = tabelaDist[numCirc] || (numCirc >= 6 ? tabelaDist[6] : 1.0);
+                        } else { // Diretamente enterrados (Tabela 44)
+                            const tabelaDist = tabela44[distanciaEnterrado];
+                            fca = tabelaDist[numCirc] || (numCirc >= 6 ? tabelaDist[6] : 1.0);
+                        }
+                    } else { // Linhas não subterrâneas (Tabela 42)
+                        const tabelaAgrup = tabela42[agrupamentoTipo];
+                        let numCircTabela = numCirc;
+                        if (!(numCirc in tabelaAgrup)) {
+                            const chaves = Object.keys(tabelaAgrup).map(Number);
+                            const maxChave = Math.max(...chaves);
+                            if (numCirc > maxChave) numCircTabela = maxChave;
+                            else {
+                                // Encontra chave mais próxima (ou usa a maior se for maior que todas)
+                                numCircTabela = chaves.reduce((prev, curr) => curr <= numCirc && curr > prev ? curr : prev, 1);
+                            }
+                            console.warn(`Número de circuitos ${numCirc} não exato na Tabela 42 (${agrupamentoTipo}). Usando ${numCircTabela}.`);
+                        }
+                        fca = tabelaAgrup[numCircTabela] || 1.0;
+                    }
+                }
+
+                // 5. Fator de Correção de Resistividade Térmica do Solo (K3)
+                let fcr = 1.0;
+                if (isEnterrado) {
+                    let resProxima = resSolo;
+                    if (!(resSolo in tabela41)) {
+                        const resDisponiveis = Object.keys(tabela41).map(Number);
+                        resProxima = resDisponiveis.reduce((prev, curr) =>
+                            Math.abs(curr - resSolo) < Math.abs(prev - resSolo) ? curr : prev
+                        );
+                        console.warn(`Resistividade ${resSolo} K.m/W não encontrada na Tabela 41. Usando ${resProxima} K.m/W.`);
+                    }
+                    fcr = tabela41[resProxima] || 1.0;
+                }
+
+                // 6. Corrente Fictícia (I'z)
+                const correnteFicticia = correnteProjeto / (fct * fca * fcr);
+
+                // 7. Seleção da Seção pela Capacidade de Corrente
+                const tabelaCapacidade = tipoIsolacao === 'PVC' ? tabela36 : tabela37;
+                const numCondutoresCarregados = tipoCircuito === 'monofasico' ? 2 : 3;
+
+                // Verifica se o método de referência existe na tabela para o material e isolação
+                if (!tabelaCapacidade[materialCondutor]?.[metodoRef]?.[numCondutoresCarregados]) {
+                    erroDiv.textContent = `Combinação inválida: Material=${materialCondutor}, Isolação=${tipoIsolacao}, Método Ref=${metodoRef}, Condutores=${numCondutoresCarregados}. Verifique as tabelas 36/37/38/39.`;
+                    erroDiv.style.display = 'block';
+                    return;
+                }
+
+                const capacidades = tabelaCapacidade[materialCondutor][metodoRef][numCondutoresCarregados];
+                let secaoSelecionadaCapacidade = null;
+
+                for (const secao of secoesPadrao) {
+                    if (capacidades[secao] && capacidades[secao] >= correnteFicticia) {
+                        secaoSelecionadaCapacidade = secao;
+                        break;
+                    }
+                }
+
+                if (secaoSelecionadaCapacidade === null) {
+                    erroDiv.textContent = "Não foi encontrada seção que suporte a corrente fictícia calculada. Verifique os dados de entrada ou a corrente é muito alta.";
+                    erroDiv.style.display = 'block';
+                    return;
+                }
+
+                // 8. Verificação da Queda de Tensão
+                // NBR 5410: Queda máxima recomendada: 4% para uso geral, 5% para motores (a partir do ponto de entrega)
+                // Vamos assumir 4% como limite geral aqui.
+                const quedaTensaoMaxPercent = 4;
+                let secaoSelecionadaFinal = secaoSelecionadaCapacidade;
+
+                while (true) {
+                    const tabelaQT = tabelaQuedaTensao[materialCondutor]?.[tipoCircuito];
+                    if (!tabelaQT || !tabelaQT[secaoSelecionadaFinal]) {
+                        console.warn(`Dados de queda de tensão não encontrados para ${materialCondutor}, ${tipoCircuito}, seção ${secaoSelecionadaFinal}mm². Usando seção por capacidade.`);
+                        break; // Sai do loop se não encontrar dados de QT
+                    }
+
+                    const valorTabelaQT = tabelaQT[secaoSelecionadaFinal]; // V/A.km
+                    const quedaTensaoCalculada = (valorTabelaQT * correnteProjeto * comp) / 1000; // Volts
+                    const quedaTensaoPercentual = (quedaTensaoCalculada / ten) * 100;
+
+                    if (quedaTensaoPercentual <= quedaTensaoMaxPercent) {
+                        break; // Seção atende à queda de tensão
+                    }
+
+                    // Se não atende, tenta a próxima seção padrão
+                    const indexAtual = secoesPadrao.indexOf(secaoSelecionadaFinal);
+                    if (indexAtual === -1 || indexAtual === secoesPadrao.length - 1) {
+                        erroDiv.textContent = `A maior seção padrão (${secaoSelecionadaFinal}mm²) não atende ao critério de queda de tensão (${quedaTensaoPercentual.toFixed(2)}% > ${quedaTensaoMaxPercent}%).`;
+                        erroDiv.style.display = 'block';
+                        return;
+                    }
+                    secaoSelecionadaFinal = secoesPadrao[indexAtual + 1];
+                }
+
+                // 9. Verificação da Seção Mínima (Tabela 47 - Simplificado)
+                let secaoMinima = 1.5; // Iluminação
+                // Adicionar lógica para outros tipos de circuito (tomadas, sinalização etc.) se necessário
+                if (tipoCircuito === 'trifasico') secaoMinima = 2.5; // Força (exemplo)
+
+                if (secaoSelecionadaFinal < secaoMinima) {
+                    console.warn(`Seção calculada (${secaoSelecionadaFinal}mm²) é menor que a mínima recomendada (${secaoMinima}mm²). Adotando seção mínima.`);
+                    secaoSelecionadaFinal = secaoMinima;
+                }
+
+                resultadoDiv.textContent = `Seção calculada: ${secaoSelecionadaFinal} mm² (Material: ${materialCondutor}, Isolação: ${tipoIsolacao}). Corrente de Projeto: ${correnteProjeto.toFixed(2)} A. Corrente Fictícia: ${correnteFicticia.toFixed(2)} A.`;
+                resultadoDiv.style.display = 'block';
+
+            } catch (e) {
+                console.error("Erro no cálculo:", e);
+                erroDiv.textContent = `Ocorreu um erro durante o cálculo: ${e.message}`;
+                erroDiv.style.display = 'block';
+            }
+        }
+
+        // Adiciona event listener ao botão de calcular
+        calcularBtn.addEventListener('click', calcularBitola);
+    </script>
 </body>
 </html>
